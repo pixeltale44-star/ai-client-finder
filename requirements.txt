@@ -3,3 +3,4 @@ playwright
 jinja2
 streamlit-authenticator==0.3.2
 pyyaml
+bcrypt
