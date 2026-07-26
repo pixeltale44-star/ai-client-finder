@@ -1,0 +1,13 @@
+credentials:
+  usernames:
+    demo_user:
+      email: demo@example.com
+      name: Demo User
+      password: '$2b$12$KIXQ8lXk1yF4z5J5t8G7fOeQwqjW5m6yqTQeF9vB1jH0kP2sN3RyO'
+      plan: free
+cookie:
+  expiry_days: 30
+  key: change_this_to_any_random_text_you_like
+  name: ai_client_finder_cookie
+preauthorized:
+  emails: []
