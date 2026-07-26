@@ -8,7 +8,7 @@ plain_password = st.text_input("Plain text password", type="password")
 
 if st.button("Generate Hash"):
     if plain_password:
-        hashed = stauth.Hasher([plain_password]).generate()[0]
+        hashed = stauth.Hasher.hash(plain_password)
         st.success("Copy this into config.yaml:")
         st.code(hashed)
     else:
