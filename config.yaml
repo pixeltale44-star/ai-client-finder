@@ -3,7 +3,7 @@ credentials:
     demo_user:
       email: demo@example.com
       name: Demo User
-      password: '$2b$12$KIXQ8lXk1yF4z5J5t8G7fOeQwqjW5m6yqTQeF9vB1jH0kP2sN3RyO'
+      password: 'password: '$2b$12$PASTE_YOUR_NEW_HASH_HERE'
       plan: free
 cookie:
   expiry_days: 30
