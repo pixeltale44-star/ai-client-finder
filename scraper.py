@@ -2,6 +2,8 @@ from playwright.sync_api import sync_playwright
 
 def scrape_gmaps_no_website(keyword, max_results=10):
     leads = []
+    debug_log = []
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
@@ -11,7 +13,6 @@ def scrape_gmaps_no_website(keyword, max_results=10):
 
         listings = page.query_selector_all('a[href*="/maps/place/"]')[:max_results]
 
-        # Grab names directly from the list view (more reliable than the detail page)
         listing_data = []
         for item in listings:
             name = item.get_attribute('aria-label') or "N/A"
@@ -23,9 +24,8 @@ def scrape_gmaps_no_website(keyword, max_results=10):
                 continue
 
             page.goto(entry["href"])
-            page.wait_for_timeout(3000)  # give the detail panel time to fully load
+            page.wait_for_timeout(3000)
 
-            # Try several possible selectors for phone, since Google's class names change often
             phone = "N/A"
             phone_selectors = [
                 'button[data-tooltip*="phone"]',
@@ -35,23 +35,30 @@ def scrape_gmaps_no_website(keyword, max_results=10):
             for sel in phone_selectors:
                 el = page.query_selector(sel)
                 if el:
-                    phone = el.get_attribute('aria-label') or el.inner_text()
-                    phone = phone.replace("Phone:", "").strip()
+                    phone = (el.get_attribute('aria-label') or el.inner_text()).replace("Phone:", "").strip()
                     break
 
-            # Try several possible selectors for a website link
-            website = None
             website_selectors = [
                 'a[data-tooltip*="website"]',
                 'a[aria-label*="Website"]',
                 'a[data-item-id="authority"]',
             ]
+            found_website = False
+            matched_selector = None
             for sel in website_selectors:
-                website = page.query_selector(sel)
-                if website:
+                if page.query_selector(sel):
+                    found_website = True
+                    matched_selector = sel
                     break
 
-            if not website:
+            debug_log.append({
+                "name": entry["name"],
+                "phone": phone,
+                "has_website": found_website,
+                "matched_selector": matched_selector
+            })
+
+            if not found_website:
                 leads.append({
                     "name": entry["name"],
                     "phone": phone,
@@ -59,4 +66,4 @@ def scrape_gmaps_no_website(keyword, max_results=10):
                 })
 
         browser.close()
-    return leads
+    return leads, debug_log
