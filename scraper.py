@@ -26,6 +26,8 @@ def scrape_gmaps_no_website(keyword, max_results=10):
             page.goto(entry["href"])
             page.wait_for_timeout(3000)
 
+            # --- Phone number: try a few possible selectors, since Google's
+            # internal class names change over time ---
             phone = "N/A"
             phone_selectors = [
                 'button[data-tooltip*="phone"]',
@@ -38,24 +40,27 @@ def scrape_gmaps_no_website(keyword, max_results=10):
                     phone = (el.get_attribute('aria-label') or el.inner_text()).replace("Phone:", "").strip()
                     break
 
-            website_selectors = [
-                'a[data-tooltip*="website"]',
-                'a[aria-label*="Website"]',
-                'a[data-item-id="authority"]',
-            ]
+            # --- Website detection ---
+            # Only count it as a real website if there's an actual link with a
+            # genuine external href. Google shows a grayed-out "Add website"
+            # suggestion button on listings that have NO website, and that
+            # button's tooltip also happens to contain the word "website" —
+            # so we check for a real http(s) link instead of matching on
+            # tooltip text alone.
             found_website = False
-            matched_selector = None
-            for sel in website_selectors:
-                if page.query_selector(sel):
+            matched_href = None
+            website_el = page.query_selector('a[data-item-id="authority"]')
+            if website_el:
+                href_val = website_el.get_attribute('href')
+                if href_val and href_val.startswith('http'):
                     found_website = True
-                    matched_selector = sel
-                    break
+                    matched_href = href_val
 
             debug_log.append({
                 "name": entry["name"],
                 "phone": phone,
                 "has_website": found_website,
-                "matched_selector": matched_selector
+                "matched_href": matched_href
             })
 
             if not found_website:
@@ -63,7 +68,3 @@ def scrape_gmaps_no_website(keyword, max_results=10):
                     "name": entry["name"],
                     "phone": phone,
                     "city": keyword.split()[-1]
-                })
-
-        browser.close()
-    return leads, debug_log
