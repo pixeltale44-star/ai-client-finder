@@ -53,9 +53,9 @@ elif st.session_state["authentication_status"]:
         st.info("Scanning Google Maps... this can take 20-40 seconds.")
         query = f"{niche} in {city}"
         st.session_state.leads, debug_info = scrape_gmaps_no_website(query, max_results=max_leads)
-with st.expander("🔍 Debug: what the scraper actually saw"):
-    st.write(debug_info)
         st.success(f"Found {len(st.session_state.leads)} leads without a website.")
+        with st.expander("🔍 Debug: what the scraper actually saw"):
+            st.write(debug_info)
 
     for i, lead in enumerate(st.session_state.leads):
         st.subheader(lead['name'])
