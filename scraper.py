@@ -26,8 +26,6 @@ def scrape_gmaps_no_website(keyword, max_results=10):
             page.goto(entry["href"])
             page.wait_for_timeout(3000)
 
-            # --- Phone number: try a few possible selectors, since Google's
-            # internal class names change over time ---
             phone = "N/A"
             phone_selectors = [
                 'button[data-tooltip*="phone"]',
@@ -40,13 +38,6 @@ def scrape_gmaps_no_website(keyword, max_results=10):
                     phone = (el.get_attribute('aria-label') or el.inner_text()).replace("Phone:", "").strip()
                     break
 
-            # --- Website detection ---
-            # Only count it as a real website if there's an actual link with a
-            # genuine external href. Google shows a grayed-out "Add website"
-            # suggestion button on listings that have NO website, and that
-            # button's tooltip also happens to contain the word "website" —
-            # so we check for a real http(s) link instead of matching on
-            # tooltip text alone.
             found_website = False
             matched_href = None
             website_el = page.query_selector('a[data-item-id="authority"]')
@@ -68,3 +59,8 @@ def scrape_gmaps_no_website(keyword, max_results=10):
                     "name": entry["name"],
                     "phone": phone,
                     "city": keyword.split()[-1]
+                })
+
+        browser.close()
+
+    return leads, debug_log
